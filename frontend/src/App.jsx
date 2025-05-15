@@ -1,26 +1,26 @@
 import { useState } from "react";
 
 export default function App() {
-  const [fileName, setFileName] = useState("");
+  const [fileNames, setFileNames] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadFailed, setUploadFailed] = useState(false);
 
-  const handleFileUpload = async (e) => {
-    setFileName("")
+  const handleFileUpload = async () => {
+    setFileNames([])
     setUploadFailed(false)
     setUploading(true);
 
-    const file = e.target.files[0];
-    if (!file) {
+    if (selectedFiles.length === 0) {
       setUploading(false);
       return;
     }
 
     const formData = new FormData();
-    formData.append("file", file);
+    selectedFiles.forEach((file) => formData.append("files", file));
 
     try {
       const res = await fetch("http://127.0.0.1:8000/upload", {
@@ -30,7 +30,7 @@ export default function App() {
       if (res.ok) {
         setUploading(false);
         setUploadFailed(false);
-        setFileName(file.name);
+        setFileNames(selectedFiles.map(f => f.name));
       } else {
         setUploading(false);
         setUploadFailed(true);
@@ -45,7 +45,7 @@ export default function App() {
     e.preventDefault();
 
     if (!question.trim()) return;
-    if (!fileName) return;
+    if (fileNames.length === 0) return;
 
     setLoading(true);
     const res = await fetch("http://127.0.0.1:8000/ask", {
@@ -60,44 +60,55 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-sky-100 flex items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-2xl bg-white shadow-xl rounded-3xl p-8 space-y-6">
-        <h1 className="text-3xl font-extrabold text-center text-indigo-700 tracking-tight">
-          DeepDoc{" "}
-          <span className="text-gray-500 text-xl">AI Document Assistant</span>
-        </h1>
-
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-sky-100 flex p-6 font-sans">
+      {/* Left Panel */}
+      <div className="w-1/3 max-w-xs bg-white shadow-xl rounded-3xl p-6 space-y-4 mr-6">
         <div>
-          <label className="block mb-2 text-sm font-medium text-gray-600">
-            Upload a PDF
-          </label>
-          <input
-            type="file"
-            onChange={handleFileUpload}
-            className="w-full p-2 border border-indigo-200 bg-indigo-50 rounded-lg text-sm hover:cursor-pointer"
-          />
-          {fileName && (
-            <p className="mt-2 text-sm text-emerald-600 font-medium">
-              Uploaded: {fileName}
-            </p>
-          )}
-          {uploadFailed && (
-            <p className="mt-2 text-sm text-red-600 font-medium">
-              Error uploading file
-            </p>
-          )}
-          {uploading && (
-            <p className="mt-2 text-sm text-blue-600 font-medium">
-              Uploading...
-            </p>
-          )}
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-lg font-bold text-gray-700">Add Files</h2>
+            <label htmlFor="file-upload" className="cursor-pointer">
+              📄➕
+            </label>
+            <input
+              id="file-upload"
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => setSelectedFiles(selectedFiles.concat(Array.from(e.target.files)))}
+            />
+          </div>
+
+          <div className="space-y-2">
+            {selectedFiles.map((file, index) => (
+              <div key={index} className="border rounded-lg p-2 text-sm bg-indigo-50">
+                <div className="font-semibold text-gray-800">{file.name}</div>
+                <div className="text-gray-600">
+                  {uploading ? "Uploading..." : uploadFailed ? "Error uploading" : fileNames.includes(file.name) ? "Successfully uploaded" : "Ready"}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleFileUpload}
+            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition mt-4"
+            disabled={uploading || selectedFiles.length === 0}
+          >
+            {uploading ? "Uploading..." : "Set Memory"}
+          </button>
         </div>
+      </div>
+
+      {/* Right Panel */}
+      <div className="flex-1 bg-white shadow-xl rounded-3xl p-8 space-y-6">
+        <h1 className="text-3xl font-extrabold text-indigo-700 tracking-tight">
+          DeepDoc <span className="text-gray-500 text-xl">AI Document Assistant</span>
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-600">
-              Ask a Question
-            </label>
+            <label className="block mb-2 text-sm font-medium text-gray-600">Ask a Question</label>
             <input
               type="text"
               value={question}
@@ -108,7 +119,7 @@ export default function App() {
           </div>
           <button
             type="submit"
-            className="w-full bg-indigo-600 hover:cursor-pointer hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition"
             disabled={loading}
           >
             {loading ? "Thinking..." : "Get Answer"}

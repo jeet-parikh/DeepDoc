@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, Form
+from typing import List 
 from fastapi.middleware.cors import CORSMiddleware
 
 from rag_pipeline import (
@@ -25,19 +26,23 @@ app.add_middleware(
 FAISS_DIR = "faiss_store"
 
 @app.post("/upload")
-async def upload_pdf(file: UploadFile = File(...)):
-    ext = file.filename.split(".")[-1]
-    filename = f"temp_{uuid.uuid4()}.{ext}"
-    with open(filename, "wb") as f:
-        f.write(await file.read())
+async def upload_pdf(files: List[UploadFile] = File(...)):
+    all_chunks = []
+    for file in files:
+        ext = file.filename.split(".")[-1]
+        filename = f"temp_{uuid.uuid4()}.{ext}"
+        with open(filename, "wb") as f:
+            f.write(await file.read())
 
-    docs = parse_pdf(filename)
-    chunks = docs_to_string_chunks(docs)
-    faiss_index = faiss_vectorize_chunks(chunks)
+        docs = parse_pdf(filename)
+        chunks = docs_to_string_chunks(docs)
+        all_chunks.extend(chunks)
+        os.remove(filename)
+
+    faiss_index = faiss_vectorize_chunks(all_chunks)
     faiss_index.save_local(FAISS_DIR)
-    os.remove(filename)
 
-    return {"status": "PDF processed", "num_chunks": len(chunks)}
+    return {"status": "PDF processed", "num_chunks": len(all_chunks)}
 
 @app.post("/ask")
 async def ask_question(question: str = Form(...)):
