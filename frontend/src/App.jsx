@@ -9,6 +9,7 @@ export default function App() {
   const [uploading, setUploading] = useState(false);
   const [uploadFailed, setUploadFailed] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [history, setHistory] = useState([]);
 
   const handleFileUpload = async () => {
     setFileNames([]);
@@ -61,16 +62,20 @@ export default function App() {
     const data = await res.json();
     console.log(data);
     setAnswer(data.answer);
+    setHistory(prev => [...prev, { question, answer: data.answer }]);
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-sky-100 flex p-6 font-sans text-gray-900">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-indigo-50 to-sky-100 p-6 font-sans text-gray-900 flex flex-col md:flex-row gap-6">
       {/* Left Panel */}
-      <div className="w-1/3 max-w-sm bg-white shadow-2xl rounded-3xl p-6 flex flex-col space-y-6 mr-8">
+      <div className="md:w-1/3 w-full max-w-sm bg-white shadow-2xl rounded-3xl p-6 flex flex-col space-y-6">
         <div>
           <h2 className="text-lg font-bold text-gray-700 mb-2">Document Memory</h2>
           <div
+            role="button"
+            aria-label="Upload files"
+            tabIndex={0}
             onDragEnter={() => setIsDragging(true)}
             onDragLeave={() => setIsDragging(false)}
             onDrop={(e) => {
@@ -79,13 +84,25 @@ export default function App() {
               const droppedFiles = Array.from(e.dataTransfer.files).filter((file) =>
                 file.type === "application/pdf"
               );
-              setSelectedFiles((prev) => prev.concat(droppedFiles));
+              setSelectedFiles((prev) => {
+                const allFiles = [...prev, ...droppedFiles];
+                const unique = allFiles.filter(
+                  (file, index, self) => self.findIndex(f => f.name === file.name) === index
+                );
+                return unique;
+              });
             }}
             onDragOver={(e) => {
               e.preventDefault();
               setIsDragging(true);
             }}
             onClick={() => document.getElementById("file-upload").click()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                document.getElementById("file-upload").click();
+              }
+            }}
             className={`w-full border-2 border-dashed rounded-xl p-4 text-center text-indigo-600 text-sm cursor-pointer transition ${
               isDragging ? 'bg-indigo-100 border-indigo-400' : 'border-indigo-300 hover:bg-indigo-50'
             }`}
@@ -98,9 +115,14 @@ export default function App() {
               multiple
               className="hidden"
               onChange={(e) =>
-                setSelectedFiles(
-                  selectedFiles.concat(Array.from(e.target.files))
-                )
+                setSelectedFiles((prev) => {
+                  const newFiles = Array.from(e.target.files);
+                  const allFiles = [...prev, ...newFiles];
+                  const unique = allFiles.filter(
+                    (file, index, self) => self.findIndex(f => f.name === file.name) === index
+                  );
+                  return unique;
+                })
               }
             />
           </div>
@@ -143,39 +165,58 @@ export default function App() {
         </button>
       </div>
 
-      {/* Right Panel */}
-      <div className="flex-1 bg-white shadow-2xl rounded-3xl p-8 space-y-6">
-        <h1 className="text-3xl font-extrabold text-indigo-700 tracking-tight">
-          DeepDoc <span className="text-gray-500 text-xl">AI Document Assistant</span>
-        </h1>
+      <div className="flex-1 w-full flex flex-col space-y-6">
+        {/* Main Right Panel */}
+        <div className="flex-1 bg-white shadow-2xl rounded-3xl p-8 space-y-6 flex flex-col">
+          <h1 className="text-3xl font-extrabold text-indigo-700 tracking-tight">
+            DeepDoc <span className="text-gray-500 text-xl">AI Document Assistant</span>
+          </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-600">
-              Ask a Question
-            </label>
-            <input
-              type="text"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              className="w-full p-3 border border-indigo-200 bg-indigo-50 rounded-lg text-sm text-gray-900"
-              placeholder="e.g., What are the main findings of the paper?"
-            />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-600">
+                Ask a Question
+              </label>
+              <input
+                type="text"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                className="w-full p-3 border border-indigo-200 bg-indigo-50 rounded-lg text-sm text-gray-900"
+                placeholder="e.g., What are the main findings of the paper?"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
+            >
+              {loading ? "Thinking..." : "Get Answer"}
+            </button>
+          </form>
+
+          <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-xl min-h-[100px] max-h-64 overflow-y-auto">
+            <h2 className="text-sm font-semibold text-gray-500 mb-1">Answer:</h2>
+            <p className="text-gray-800 whitespace-pre-wrap">
+              {answer || "The AI’s response will appear here."}
+            </p>
           </div>
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={loading}
-          >
-            {loading ? "Thinking..." : "Get Answer"}
-          </button>
-        </form>
+        </div>
+      </div>
 
-        <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-xl min-h-[100px]">
-          <h2 className="text-sm font-semibold text-gray-500 mb-1">Answer:</h2>
-          <p className="text-gray-800 whitespace-pre-wrap">
-            {answer || "The AI’s response will appear here."}
-          </p>
+      {/* History Panel */}
+      <div className="md:w-1/3 w-full max-w-sm bg-white shadow-2xl rounded-3xl p-6 flex flex-col space-y-4 h-full overflow-hidden">
+        <h2 className="text-lg font-bold text-gray-700 mb-2">History</h2>
+        <div className="overflow-y-auto flex-1 space-y-2">
+          {history.length === 0 ? (
+            <p className="text-sm text-gray-500">No questions asked yet.</p>
+          ) : (
+            [...history].reverse().map((item, idx) => (
+              <div key={idx} className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 shadow-sm space-y-1">
+                <p className="text-sm font-semibold text-indigo-700">Q: {item.question}</p>
+                <p className="text-sm text-gray-700">A: {item.answer}</p>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
