@@ -165,10 +165,10 @@ export default function App() {
         </button>
       </div>
 
-      <div className="flex-1 w-full flex flex-col space-y-6">
+      <div className="flex-1 w-full flex flex-col h-full shadow-2xl bg-white rounded-2xl">
         {/* Main Right Panel */}
-        <div className="flex-1 bg-white shadow-2xl rounded-3xl p-8 space-y-6 flex flex-col">
-          <h1 className="text-3xl font-extrabold text-indigo-700 tracking-tight">
+        <div className="bg-white rounded-3xl rounded-br-none rounded-bl-none p-8 space-y-6">
+          <h1 className="text-3xl font-extrabold text-indigo-600 tracking-tight">
             DeepDoc <span className="text-gray-500 text-xl">AI Document Assistant</span>
           </h1>
 
@@ -187,19 +187,18 @@ export default function App() {
             </div>
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={loading}
+              className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || selectedFiles.length==0}
             >
               {loading ? "Thinking..." : "Get Answer"}
             </button>
           </form>
-
-          <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-xl min-h-[100px] max-h-64 overflow-y-auto">
-            <h2 className="text-sm font-semibold text-gray-500 mb-1">Answer:</h2>
-            <p className="text-gray-800 whitespace-pre-wrap">
-              {answer || "The AI’s response will appear here."}
-            </p>
-          </div>
+        </div>
+        <div className="bg-white rounded-3xl rounded-tl-none rounded-tr-none pb-8 pl-8 pr-8 space-y-6 overflow-y-auto">
+          <label className="block mb-2 text-sm font-medium text-gray-600">Answer:</label>
+          <p className="w-full p-3 border border-indigo-200 bg-indigo-50 rounded-lg text-sm text-gray-900 whitespace-pre-wrap">
+            {answer || "The AI’s response will appear here."}
+          </p>
         </div>
       </div>
 
