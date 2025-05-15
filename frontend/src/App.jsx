@@ -8,6 +8,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadFailed, setUploadFailed] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleFileUpload = async () => {
     setFileNames([]);
@@ -70,16 +71,24 @@ export default function App() {
         <div>
           <h2 className="text-lg font-bold text-gray-700 mb-2">Document Memory</h2>
           <div
+            onDragEnter={() => setIsDragging(true)}
+            onDragLeave={() => setIsDragging(false)}
             onDrop={(e) => {
               e.preventDefault();
+              setIsDragging(false);
               const droppedFiles = Array.from(e.dataTransfer.files).filter((file) =>
                 file.type === "application/pdf"
               );
               setSelectedFiles((prev) => prev.concat(droppedFiles));
             }}
-            onDragOver={(e) => e.preventDefault()}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
             onClick={() => document.getElementById("file-upload").click()}
-            className="w-full border-2 border-dashed border-indigo-300 rounded-xl p-4 text-center text-indigo-600 text-sm cursor-pointer hover:bg-indigo-50 transition"
+            className={`w-full border-2 border-dashed rounded-xl p-4 text-center text-indigo-600 text-sm cursor-pointer transition ${
+              isDragging ? 'bg-indigo-100 border-indigo-400' : 'border-indigo-300 hover:bg-indigo-50'
+            }`}
           >
             📄 Drag & drop PDF files here or click to select
             <input
