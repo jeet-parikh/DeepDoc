@@ -68,7 +68,6 @@ export default function App() {
 
   return (
     <div className="h-screen overflow-hidden bg-gradient-to-br from-indigo-50 to-sky-100 p-6 font-sans text-gray-900 flex flex-col md:flex-row gap-6">
-      {/* Left Panel */}
       <div className="md:w-1/3 w-full max-w-sm bg-white shadow-2xl rounded-3xl p-6 flex flex-col space-y-6">
         <div>
           <h2 className="text-lg font-bold text-gray-700 mb-2">Document Memory</h2>
@@ -166,7 +165,6 @@ export default function App() {
       </div>
 
       <div className="flex-1 w-full flex flex-col h-full shadow-2xl bg-white rounded-2xl">
-        {/* Main Right Panel */}
         <div className="bg-white rounded-3xl rounded-br-none rounded-bl-none p-8 space-y-6">
           <h1 className="text-3xl font-extrabold text-indigo-600 tracking-tight">
             DeepDoc <span className="text-gray-500 text-xl">AI Document Assistant</span>
@@ -202,17 +200,21 @@ export default function App() {
         </div>
       </div>
 
-      {/* History Panel */}
       <div className="md:w-1/3 w-full max-w-sm bg-white shadow-2xl rounded-3xl p-6 flex flex-col space-y-4 h-full overflow-hidden">
         <h2 className="text-lg font-bold text-gray-700 mb-2">History</h2>
-        <div className="overflow-y-auto flex-1 space-y-2">
+        <div className="overflow-y-auto flex-1 space-y-4">
           {history.length === 0 ? (
             <p className="text-sm text-gray-500">No questions asked yet.</p>
           ) : (
             [...history].reverse().map((item, idx) => (
-              <div key={idx} className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 shadow-sm space-y-1">
-                <p className="text-sm font-semibold text-indigo-700">Q: {item.question}</p>
-                <p className="text-sm text-gray-700">A: {item.answer}</p>
+              <div
+                key={idx}
+                className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 shadow-sm space-y-1 max-h-32 overflow-hidden hover:overflow-y-auto transition-all"
+              >
+                <p className="text-sm font-semibold text-indigo-700 truncate">Q: {item.question}</p>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap text-ellipsis overflow-hidden">
+                  A: {item.answer}
+                </p>
               </div>
             ))
           )}
