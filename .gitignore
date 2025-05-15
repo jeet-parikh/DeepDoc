@@ -1,0 +1,52 @@
+# Environment variables
+.env
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+env/
+venv/
+*.env
+
+# FastAPI / Uvicorn
+*.log
+
+# VSCode settings
+.vscode/
+
+# macOS
+.DS_Store
+
+# OS metadata
+Thumbs.db
+Desktop.ini
+
+# Pycache and coverage
+.cache/
+coverage/
+htmlcov/
+*.cover
+*.py,cover
+
+# FAISS or model files (if used)
+*.faiss
+*.pkl
+*.pt
+*.bin
+
+# Local dev
+*.db
+*.sqlite3
+local_settings.py
