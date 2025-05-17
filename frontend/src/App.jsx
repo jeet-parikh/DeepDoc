@@ -11,6 +11,8 @@ export default function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [history, setHistory] = useState([]);
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
   const handleFileUpload = async () => {
     setFileNames([]);
     setUploadFailed(false);
@@ -25,7 +27,7 @@ export default function App() {
     selectedFiles.forEach((file) => formData.append("files", file));
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/upload", {
+      const res = await fetch(`${BACKEND_URL}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -54,7 +56,7 @@ export default function App() {
     if (fileNames.length === 0) return;
 
     setLoading(true);
-    const res = await fetch("http://127.0.0.1:8000/ask", {
+    const res = await fetch(`${BACKEND_URL}/ask`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ question }),
