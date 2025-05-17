@@ -25,6 +25,10 @@ app.add_middleware(
 
 FAISS_DIR = "faiss_store"
 
+@app.get("/")
+def health():
+    return {"status": "DeepDoc backend is live"}
+
 @app.post("/upload")
 async def upload_pdf(files: List[UploadFile] = File(...)):
     all_chunks = []
