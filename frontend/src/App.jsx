@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Analytics } from "@vercel/analytics/next"
 
 export default function App() {
   const [fileNames, setFileNames] = useState([]);
@@ -74,6 +75,7 @@ export default function App() {
 
   return (
     <div className="h-screen overflow-hidden bg-gradient-to-br from-indigo-50 to-sky-100 p-6 font-sans text-gray-900 flex flex-col md:flex-row gap-6">
+      <Analytics/>
       <div className="md:w-1/3 w-full max-w-sm bg-white shadow-2xl rounded-3xl p-6 flex flex-col space-y-6">
         <div>
           <h2 className="text-lg font-bold text-gray-700 mb-2">
