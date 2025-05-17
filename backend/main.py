@@ -25,6 +25,10 @@ app.add_middleware(
 
 FAISS_DIR = "faiss_store"
 
+@app.get("/ping")
+def ping():
+    return {"message": "pong"}
+
 @app.get("/")
 def health():
     return {"status": "DeepDoc backend is live"}

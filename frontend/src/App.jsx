@@ -23,6 +23,7 @@ export default function App() {
       return;
     }
 
+    console.log("Selected files:", selectedFiles);
     const formData = new FormData();
     selectedFiles.forEach((file) => formData.append("files", file));
 
